@@ -59,6 +59,7 @@ import dynamic from "next/dynamic";
 
 import { ChatControllerPool } from "../client/controller";
 import { Prompt, usePromptStore } from "../store/prompt";
+// import { Lang, useLangStore } from "../store/lang";
 import Locale from "../locales";
 
 import { IconButton } from "./button";
@@ -397,7 +398,7 @@ export function ChatActions(props: {
   showPromptModal: () => void;
   scrollToBottom: () => void;
   showPromptHints: () => void;
-  showPromptOutLang: () => void;
+  showLangHints: () => void;
   hitBottom: boolean;
 }) {
   const config = useAppConfig();
@@ -479,8 +480,8 @@ export function ChatActions(props: {
 
       {/*语言选择, 暂时不用*/}
       {/*<ChatAction*/}
-      {/*    onClick={props.showPromptOutLang}*/}
-      {/*    text={Locale.Chat.InputActions.OutLang}*/}
+      {/*    onClick={props.showLangHints}*/}
+      {/*    text={Locale.Chat.InputActions.Lang}*/}
       {/*    icon={<PromptIcon />}*/}
       {/*/>*/}
 
@@ -531,6 +532,10 @@ export function ChatActions(props: {
           }}
         />
       )}
+      {/*显示当前语言地区1*/}
+      <IconButton
+          text={"Region: " + Region + " & Output Language: " + Lang}
+      />
     </div>
   );
 }
@@ -596,8 +601,8 @@ export function EditMessageModal(props: { onClose: () => void }) {
     </div>
   );
 }
-let Region: string | null="Texas"
-let Lang: string | null = "English";
+let Region: string="Texas"
+let Lang: string = "English";
 export function Chat() {
   type RenderMessage = ChatMessage & { preview?: boolean };
 
@@ -807,9 +812,12 @@ export function Chat() {
         setUserInput("");
       } else {
         // setUserInput(userInput+prompt.content);
+        let extractedLang = extractLang(prompt.title);
+        let extractedRegion = extractRegion(prompt.title);
+
         //设置地区或是语言变量
-        Lang=(extractLang(prompt.title))==null?Lang:(extractLang(prompt.title))
-        Region=(extractRegion(prompt.title))==null?Region:(extractRegion(prompt.title))
+        Lang = extractedLang == undefined ? Lang : extractedLang;
+        Region = extractedRegion == undefined ? Region : extractedRegion;
       }
       inputRef.current?.focus();
     }, 30);
@@ -1289,6 +1297,7 @@ export function Chat() {
       </div>
 
       <div className={styles["chat-input-panel"]}>
+        {/*显示当前语言地区2*/}
         <PromptHints prompts={promptHints} onPromptSelect={onPromptSelect} />
 
         <ChatActions
@@ -1305,7 +1314,7 @@ export function Chat() {
             inputRef.current?.focus();
             onSearch("");
           }}
-          showPromptOutLang={() => {
+          showLangHints={() => {
             // Click again to close
             if (promptHints.length > 0) {
               setPromptHints([]);
